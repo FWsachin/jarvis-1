@@ -1,0 +1,97 @@
+def get_daily_fact():
+    facts = [
+        "Honey never spoils. Archaeologists have found pots of honey in ancient Egyptian tombs that are over 3,000 years old and still edible.",
+        "Bananas are berries, but strawberries are not.",
+        "A day on Venus is longer than a year on Venus.",
+        "Octopuses have three hearts.",
+        "The inventor of the frisbee was turned into a frisbee after he died.",
+        "A group of flamingos is called a 'flamboyance'.",
+        "You can hear a blue whale's heartbeat from more than 2 miles away.",
+        "The Eiffel Tower can be 15 cm taller during hot days.",
+        "Wombat poop is cube-shaped.",
+        "The world's smallest reptile was discovered in 2021 - it's a chameleon that can fit on the tip of a finger."
+    ]
+    return random.choice(facts)
+
+def get_motivational_quote():
+    quotes = [
+        "Success is not final, failure is not fatal: It is the courage to continue that counts.",
+        "The best time to plant a tree was 20 years ago. The second best time is now.",
+        "Your limitation—it’s only your imagination.",
+        "Great things never come from comfort zones.",
+        "Dream it. Wish it. Do it."
+    ]
+    return random.choice(quotes)
+
+def get_horoscope(sign):
+    horoscopes = {
+        "aries": "Today you may find clarity in a situation that has been confusing.",
+        "taurus": "You may feel extra motivated to pursue your goals today.",
+        "gemini": "It's a good day for collaboration and communication.",
+        "cancer": "Focus on personal goals and self-care today.",
+        "leo": "Today might bring some exciting opportunities your way.",
+        "virgo": "A productive day for taking care of any pending work.",
+        "libra": "Today is a good day to seek balance in work and life.",
+        "scorpio": "You might find new insights into a recent challenge.",
+        "sagittarius": "Be open to unexpected adventures today.",
+        "capricorn": "Today is ideal for planning your next steps carefully.",
+        "aquarius": "Today you may gain a fresh perspective on a recurring issue.",
+        "pisces": "Pay attention to your dreams—they may be telling you something important."
+    }
+    return horoscopes.get(sign.lower(), "Sorry, I couldn't find your horoscope.")
+
+if __name__ == "__main__":
+    while True:
+        query = takeCommand().lower()
+        if "arise" in query:
+            from GreetMe import greetMe
+            greetMe()
+
+            while True:
+                query = takeCommand().lower()
+                if "deactivate" in query:
+                    speak("Deactivating, say arise to activate again ")
+                    break
+
+                #################### JARVIS: Additional Features #####################
+
+                elif "i want to play chess" in query:
+                    speak("Opening Chess.com for you.")
+                    webbrowser.open("https://www.chess.com")
+
+                elif "i want to play some online games" in query:
+                    speak("Opening Poki for you.")
+                    webbrowser.open("https://poki.com")
+
+                elif "chat gpt" in query:
+                    speak("Opening ChatGPT.")
+                    webbrowser.open("https://chat.openai.com")
+
+                elif "i have a coding error" in query:
+                    speak("Opening Blackbox AI to assist with your coding error.")
+                    webbrowser.open("https://www.useblackbox.io/")
+
+                elif "my horoscope" in query:
+                    speak("Please tell me your zodiac sign.")
+                    sign = takeCommand().lower()
+                    horoscope = get_horoscope(sign)
+                    speak(f"Your horoscope for {sign} is: {horoscope}")
+
+                elif "countdown timer" in query:
+                    speak("For how many seconds should I set the timer?")
+                    try:
+                        seconds = int(input("Enter the number of seconds: "))
+                        countdown_timer(seconds)
+                    except ValueError:
+                        speak("Sorry, that wasn't a valid number.")
+
+                elif "daily fact" in query:
+                    fact = get_daily_fact()
+                    speak(f"Here's a daily fact for you: {fact}")
+
+                elif "motivation" in query:
+                    quote = get_motivational_quote()
+                    speak(f"Here's a motivational quote: {quote}")
+
+                ############################################################
+                # Existing functionality continues here...
