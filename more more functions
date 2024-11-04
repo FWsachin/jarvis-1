@@ -1,0 +1,31 @@
+def jarvis():
+    speak("How can I assist you?")
+    query = listen()
+    
+    if query:
+        # Recipe suggestion
+        if "recipe" in query and "with" in query:
+            ingredients = [word for word in query.split() if word.lower() not in ["suggest", "a", "dinner", "recipe", "with"]]
+            api_key = "YOUR_SPOONACULAR_API_KEY"  # Replace with your Spoonacular API key
+            ingredients_param = ",".join(ingredients)
+            url = f"https://api.spoonacular.com/recipes/findByIngredients?ingredients={ingredients_param}&number=1&apiKey={api_key}"
+            response = requests.get(url)
+            data = response.json()
+            if data:
+                recipe = data[0]
+                title = recipe['title']
+                recipe_url = f"https://spoonacular.com/recipes/{title.replace(' ', '-').lower()}-{recipe['id']}"
+                speak(f"How about {title}? You can check the recipe here: {recipe_url}")
+            else:
+                speak("Sorry, I couldn't find any recipes with those ingredients.")
+        
+        # Real-time translation
+        elif "translate" in query:
+            text_to_translate = query.split("'")[1]  # Extracts text in single quotes
+            target_language = query.split()[-1].lower()  # Last word is assumed to be the language
+            translator = Translator()
+            translation = translator.translate(text_to_translate, dest=target_language)
+            translated_text = translation.text
+            speak(f"The translation is: {translated_text}")
+        
+        # Other commands can go here in more elif statements
