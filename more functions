@@ -1,0 +1,166 @@
+import random
+import operator
+import requests
+import pyttsx3
+import speech_recognition as sr
+import webbrowser
+
+# Initialize text-to-speech
+engine = pyttsx3.init()
+
+def speak(text):
+    engine.say(text)
+    engine.runAndWait()
+
+def listen():
+    recognizer = sr.Recognizer()
+    with sr.Microphone() as source:
+        print("Listening...")
+        recognizer.adjust_for_ambient_noise(source)
+        audio = recognizer.listen(source)
+    try:
+        print("Recognizing...")
+        query = recognizer.recognize_google(audio)
+        print(f"You said: {query}")
+        return query.lower()
+    except sr.UnknownValueError:
+        speak("Sorry, I didn't catch that. Could you please repeat?")
+        return None
+
+# Functions for each feature
+
+# Coin Toss
+def coin_toss():
+    result = random.choice(["Heads", "Tails"])
+    speak(f"The result is {result}")
+
+# Simple Math Operations
+def calculate(expression):
+    try:
+        operators = {
+            'plus': operator.add,
+            'minus': operator.sub,
+            'times': operator.mul,
+            'divided by': operator.truediv
+        }
+        for word, func in operators.items():
+            if word in expression:
+                operands = expression.split(word)
+                num1, num2 = float(operands[0]), float(operands[1])
+                result = func(num1, num2)
+                speak(f"The result is {result}")
+                return
+        speak("Sorry, I couldn't understand the math expression.")
+    except Exception as e:
+        speak("There was an error with the calculation.")
+
+# Currency Conversion
+def currency_conversion(amount, from_currency, to_currency):
+    api_key = "YOUR_API_KEY"  # Replace with your actual API key
+    url = f"https://open.er-api.com/v6/latest/{from_currency.upper()}"
+    response = requests.get(url)
+    data = response.json()
+    if data.get("result") == "success":
+        conversion_rate = data["rates"].get(to_currency.upper())
+        if conversion_rate:
+            converted_amount = float(amount) * conversion_rate
+            speak(f"{amount} {from_currency} is equal to {converted_amount:.2f} {to_currency}")
+        else:
+            speak(f"Sorry, I couldn't find the conversion rate for {to_currency}.")
+    else:
+        speak("There was an error fetching currency data.")
+
+# Weather of Any City
+def get_weather(city):
+    api_key = "YOUR_API_KEY"  # Replace with your actual API key
+    url = f"http://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_key}&units=metric"
+    response = requests.get(url)
+    data = response.json()
+    if data.get("cod") == 200:
+        temp = data["main"]["temp"]
+        description = data["weather"][0]["description"]
+        speak(f"The temperature in {city} is {temp}°C with {description}.")
+    else:
+        speak("I couldn't retrieve the weather information.")
+
+# Unit Conversion
+def unit_conversion(amount, from_unit, to_unit):
+    conversions = {
+        ('meters', 'kilometers'): lambda x: x / 1000,
+        ('kilometers', 'meters'): lambda x: x * 1000,
+        ('grams', 'kilograms'): lambda x: x / 1000,
+        ('kilograms', 'grams'): lambda x: x * 1000,
+    }
+    try:
+        conversion_func = conversions.get((from_unit, to_unit))
+        if conversion_func:
+            result = conversion_func(float(amount))
+            speak(f"{amount} {from_unit} is equal to {result} {to_unit}.")
+        else:
+            speak("Sorry, I can't convert between those units.")
+    except Exception as e:
+        speak("There was an error with the unit conversion.")
+
+# Open Netflix or Anime Site
+def open_website(query):
+    if "movie" in query:
+        webbrowser.open("https://www.netflix.com")
+        speak("Opening Netflix.")
+    elif "anime" in query:
+        webbrowser.open("https://aniwatchtv.to/home")
+        speak("Opening Aniwatch.")
+
+# Main command loop with elif statements
+def jarvis():
+    speak("How can I assist you?")
+    query = listen()
+    
+    if query:
+        # Coin toss
+        if "toss a coin" in query:
+            coin_toss()
+        
+        # Simple math operations
+        elif any(op in query for op in ["plus", "minus", "times", "divided by"]):
+            calculate(query)
+        
+        # Currency conversion
+        elif "convert" in query and "to" in query:
+            try:
+                words = query.split()
+                amount = words[words.index("convert") + 1]
+                from_currency = words[words.index("convert") + 2]
+                to_currency = words[words.index("to") + 1]
+                currency_conversion(amount, from_currency, to_currency)
+            except:
+                speak("Please specify the amount, source, and target currency.")
+
+        # Weather information
+        elif "weather" in query:
+            try:
+                city = query.split("in")[-1].strip()
+                get_weather(city)
+            except:
+                speak("Please specify a city.")
+
+        # Unit conversion
+        elif "convert" in query:
+            try:
+                words = query.split()
+                amount = words[words.index("convert") + 1]
+                from_unit = words[words.index("convert") + 2]
+                to_unit = words[words.index("to") + 1]
+                unit_conversion(amount, from_unit, to_unit)
+            except:
+                speak("Please specify the amount, source, and target units.")
+
+        # Open websites
+        elif "watch a movie" in query:
+            open_website("movie")
+        
+        elif "watch anime" in query:
+            open_website("anime")
+
+        # Additional commands can be added here as more elif statements
+        else:
+            speak("I'm not sure how to help with that.")
